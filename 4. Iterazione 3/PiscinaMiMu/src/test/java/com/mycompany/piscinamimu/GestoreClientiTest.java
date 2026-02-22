@@ -96,4 +96,44 @@ void testMostraTuttiClienti() throws ClienteGiaPresenteException {
 
         gestore.mostraClientiPerTipologia(Cliente.TipologiaCliente.Donne);
     }
+    
+    @Test
+    void testIscrizioneClienteCorso_ok() throws Exception{
+        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
+        gestore.aggiungiCliente(c1);
+        DescrizioneCorso cd = new DescrizioneCorso("Corso1", "Uomini", 2, 2, 0);
+        Corso c = new Corso("C1", cd);
+        
+        assertDoesNotThrow(() -> gestore.IscrizioneClienteCorso("001", c));
+    }
+    
+    @Test
+    void testiIscrizioneClienteCorso_TipologiaNonCorrispondente() throws Exception{
+        Cliente c1 = new Cliente("Maria", "Rossi", "001", Cliente.TipologiaCliente.Donne);
+        gestore.aggiungiCliente(c1);
+        DescrizioneCorso cd = new DescrizioneCorso("Corso1", "Uomini", 2, 2, 0);
+        Corso c = new Corso("C1", cd);
+        
+        assertThrows(TipologiaNonCorrispondente.class, ()->gestore.IscrizioneClienteCorso("001", c));
+    }
+    
+    @Test
+    void testiIscrizioneClienteCorso_ClienteGiaIscrittoException() throws Exception{
+        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
+        gestore.aggiungiCliente(c1);
+        DescrizioneCorso cd = new DescrizioneCorso("Corso1", "Uomini", 2, 2, 0);
+        Corso c = new Corso("C1", cd);
+        gestore.IscrizioneClienteCorso("001", c);
+        assertThrows(ClienteGiaIscrittoException.class, ()->gestore.IscrizioneClienteCorso("001", c));
+    }
+    
+    @Test
+    void testiIscrizioneClienteCorso_PostiPieniException() throws Exception{
+        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
+        gestore.aggiungiCliente(c1);
+        DescrizioneCorso cd = new DescrizioneCorso("Corso1", "Uomini", 2, 2, 2);
+        Corso c = new Corso("C1", cd);
+
+        assertThrows(PostiPieniException.class, ()->gestore.IscrizioneClienteCorso("001", c));
+    }
 }
