@@ -22,7 +22,7 @@ public class ClienteTest {
 
     @BeforeEach
     public void setUp() {
-        cliente = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
+        cliente = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
     }
 
     @Test
@@ -42,7 +42,7 @@ public class ClienteTest {
     // Momentaneo, quando si farà l'assegna corso potrebbe dover cambiare
     @Test
     public void testAggiuntaCorso() {
-        Corso corso = new Corso("C001", new DescrizioneCorso("Nuoto Base", "Uomini", 4, 10, 2));
+        Corso corso = new Corso("C001", new DescrizioneCorso("Nuoto Base",Vasca.TipoVasca.UOMINI, 4, 10, 2));
         cliente.getCorsiIscritti().put(corso.getIdCorso(), corso);
 
         assertEquals(1, cliente.numCorsi());
@@ -54,15 +54,15 @@ public class ClienteTest {
     @Test
     public void testToStringContieneInfoCliente() {
         String output = cliente.toString();
-        Cliente cliente = new Cliente("001", "Mario", "Rossi", Cliente.TipologiaCliente.Uomini);
+        Cliente cliente = new Cliente("001", "Mario", "Rossi", Cliente.TipologiaCliente.UOMINI);
         assertTrue(output.contains("Mario"));
         assertTrue(output.contains("Rossi"));
         assertTrue(output.contains("001"));
-        assertTrue(output.contains("tipologia=Uomini"));
+        assertTrue(output.contains("tipologia=UOMINI"));
         assertTrue(output.contains("numeroCorsi=0"));
 
         // Ritesto dopo aver aggiunto un corso
-        Corso corso = new Corso("C001", new DescrizioneCorso("Nuoto Base", "Uomini", 4, 10, 2));
+        Corso corso = new Corso("C001", new DescrizioneCorso("Nuoto Base", Vasca.TipoVasca.UOMINI, 4, 10, 2));
         cliente.getCorsiIscritti().put(corso.getIdCorso(), corso);
         output = cliente.toString();
         assertTrue(output.contains("numeroCorsi=1"));

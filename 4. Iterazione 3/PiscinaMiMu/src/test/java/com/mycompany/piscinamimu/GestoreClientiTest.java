@@ -26,17 +26,17 @@ public class GestoreClientiTest {
     }
 
     @Test
-    public void testAggiungiClienteNuovo() throws ClienteGiaPresenteException {
-        Cliente c = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
+    public void testAggiungiClienteNuovo() throws ClienteGiaPresenteException, ClienteNonPresenteException {
+        Cliente c = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
         gestore.aggiungiCliente(c);
         assertEquals(c, gestore.getCliente("001"));
     }
 
     @Test
     public void testAggiungiClienteDuplicato() throws ClienteGiaPresenteException {
-        Cliente c = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
+        Cliente c = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
         gestore.aggiungiCliente(c);
-        Cliente duplicato = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
+        Cliente duplicato = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
 
         ClienteGiaPresenteException ex = assertThrows(
             ClienteGiaPresenteException.class,
@@ -47,19 +47,25 @@ public class GestoreClientiTest {
 
     @Test
     void testGetClienteNonEsistente() throws ClienteGiaPresenteException {
-        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
-        Cliente c2 = new Cliente("Luigi", "Bianchi", "002", Cliente.TipologiaCliente.Uomini);
+        // Aggiungo due clienti
+        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
+        Cliente c2 = new Cliente("Luigi", "Bianchi", "002", Cliente.TipologiaCliente.UOMINI);
         gestore.aggiungiCliente(c1);
         gestore.aggiungiCliente(c2);
 
-        String idNonPresente = "003"; 
-        assertNull(gestore.getCliente(idNonPresente));
+        // ID inesistente
+        String idNonPresente = "003";
+
+        // Verifico che venga lanciata l'eccezione
+        assertThrows(ClienteNonPresenteException.class, () -> {
+            gestore.getCliente(idNonPresente);
+        });
     }
 
     @Test
     public void testGetElencoClienti() throws ClienteGiaPresenteException {
-        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
-        Cliente c2 = new Cliente("Luigi", "Bianchi", "002", Cliente.TipologiaCliente.Uomini);
+        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
+        Cliente c2 = new Cliente("Luigi", "Bianchi", "002", Cliente.TipologiaCliente.UOMINI);
         gestore.aggiungiCliente(c1);
         gestore.aggiungiCliente(c2);
 
@@ -71,8 +77,8 @@ public class GestoreClientiTest {
 
 @Test
 void testMostraTuttiClienti() throws ClienteGiaPresenteException {
-    Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
-    Cliente c2 = new Cliente("Luigi", "Bianchi", "002", Cliente.TipologiaCliente.Donne);
+    Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
+    Cliente c2 = new Cliente("Luigi", "Bianchi", "002", Cliente.TipologiaCliente.DONNE);
     gestore.aggiungiCliente(c1);
     gestore.aggiungiCliente(c2);
 
@@ -81,27 +87,27 @@ void testMostraTuttiClienti() throws ClienteGiaPresenteException {
 
     @Test
     void testMostraClientiPerTipologiaConClienti() throws ClienteGiaPresenteException {
-        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
-        Cliente c2 = new Cliente("Luigi", "Bianchi", "002", Cliente.TipologiaCliente.Donne);
+        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
+        Cliente c2 = new Cliente("Luigi", "Bianchi", "002", Cliente.TipologiaCliente.DONNE);
         gestore.aggiungiCliente(c1);
         gestore.aggiungiCliente(c2);
 
-        gestore.mostraClientiPerTipologia(Cliente.TipologiaCliente.Uomini);
+        gestore.mostraClientiPerTipologia(Cliente.TipologiaCliente.UOMINI);
     }
 
     @Test
     void testMostraClientiPerTipologiaSenzaClienti() throws ClienteGiaPresenteException {
-        Cliente c = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
+        Cliente c = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
         gestore.aggiungiCliente(c);
 
-        gestore.mostraClientiPerTipologia(Cliente.TipologiaCliente.Donne);
+        gestore.mostraClientiPerTipologia(Cliente.TipologiaCliente.DONNE);
     }
     
     @Test
     void testIscrizioneClienteCorso_ok() throws Exception{
-        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
+        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
         gestore.aggiungiCliente(c1);
-        DescrizioneCorso cd = new DescrizioneCorso("Corso1", "Uomini", 2, 2, 0);
+        DescrizioneCorso cd = new DescrizioneCorso("Corso1", Vasca.TipoVasca.UOMINI, 2, 2, 0);
         Corso c = new Corso("C1", cd);
         
         assertDoesNotThrow(() -> gestore.IscrizioneClienteCorso("001", c));
@@ -109,9 +115,9 @@ void testMostraTuttiClienti() throws ClienteGiaPresenteException {
     
     @Test
     void testiIscrizioneClienteCorso_TipologiaNonCorrispondente() throws Exception{
-        Cliente c1 = new Cliente("Maria", "Rossi", "001", Cliente.TipologiaCliente.Donne);
+        Cliente c1 = new Cliente("Maria", "Rossi", "001", Cliente.TipologiaCliente.DONNE);
         gestore.aggiungiCliente(c1);
-        DescrizioneCorso cd = new DescrizioneCorso("Corso1", "Uomini", 2, 2, 0);
+        DescrizioneCorso cd = new DescrizioneCorso("Corso1", Vasca.TipoVasca.UOMINI, 2, 2, 0);
         Corso c = new Corso("C1", cd);
         
         assertThrows(TipologiaNonCorrispondente.class, ()->gestore.IscrizioneClienteCorso("001", c));
@@ -119,9 +125,9 @@ void testMostraTuttiClienti() throws ClienteGiaPresenteException {
     
     @Test
     void testiIscrizioneClienteCorso_ClienteGiaIscrittoException() throws Exception{
-        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
+        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
         gestore.aggiungiCliente(c1);
-        DescrizioneCorso cd = new DescrizioneCorso("Corso1", "Uomini", 2, 2, 0);
+        DescrizioneCorso cd = new DescrizioneCorso("Corso1", Vasca.TipoVasca.UOMINI, 2, 2, 0);
         Corso c = new Corso("C1", cd);
         gestore.IscrizioneClienteCorso("001", c);
         assertThrows(ClienteGiaIscrittoException.class, ()->gestore.IscrizioneClienteCorso("001", c));
@@ -129,9 +135,9 @@ void testMostraTuttiClienti() throws ClienteGiaPresenteException {
     
     @Test
     void testiIscrizioneClienteCorso_PostiPieniException() throws Exception{
-        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.Uomini);
+        Cliente c1 = new Cliente("Mario", "Rossi", "001", Cliente.TipologiaCliente.UOMINI);
         gestore.aggiungiCliente(c1);
-        DescrizioneCorso cd = new DescrizioneCorso("Corso1", "Uomini", 2, 2, 2);
+        DescrizioneCorso cd = new DescrizioneCorso("Corso1", Vasca.TipoVasca.UOMINI, 2, 2, 2);
         Corso c = new Corso("C1", cd);
 
         assertThrows(PostiPieniException.class, ()->gestore.IscrizioneClienteCorso("001", c));

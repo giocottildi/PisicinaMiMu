@@ -24,7 +24,7 @@ public class CorsoTest {
     
     @BeforeEach
     public void setUp() {
-        descrizione = new DescrizioneCorso("NuotoSincronizzato", "Donne", 10, 2, 0);
+        descrizione = new DescrizioneCorso("NuotoSincronizzato", Vasca.TipoVasca.DONNE, 10, 2, 0);
         corso = new Corso("C1", descrizione);
     }
 

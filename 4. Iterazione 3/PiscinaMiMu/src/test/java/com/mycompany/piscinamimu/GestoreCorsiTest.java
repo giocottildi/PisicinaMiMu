@@ -22,7 +22,7 @@ public class GestoreCorsiTest {
     @BeforeEach
     void setUp() {
         gestore = new GestoreCorsi();
-        descr = new DescrizioneCorso("NuotoSincronizzato", "Donne", 10, 5, 0);
+        descr = new DescrizioneCorso("NuotoSincronizzato", Vasca.TipoVasca.DONNE, 10, 5, 0);
     }
 
     @Test
@@ -90,7 +90,7 @@ public class GestoreCorsiTest {
     @Test
     public void aggiungiLezione_programmazionePiena() throws Exception {
         // Corso con durata = 2, provo ad aggiungere 3 lezioni
-        DescrizioneCorso descPiccolo = new DescrizioneCorso("MiniCorso", "Adulti", 5, 2, 0);
+        DescrizioneCorso descPiccolo = new DescrizioneCorso("MiniCorso", Vasca.TipoVasca.UOMINI, 5, 2, 0);
         gestore.aggiungiCorso("C6", descPiccolo);
         Corso corso = gestore.cercaCorso("C6");
 
@@ -234,7 +234,24 @@ public class GestoreCorsiTest {
     
     @Test
     void testAggiungiCorsia_OK() throws Exception {
-        // Creo corso e lo aggiungo
+        
+        // Sottoclasse concreta di Vasca per i test
+        class VascaTest extends Vasca {
+            private TipoVasca tipo;
+
+            public VascaTest(String id, TipoVasca tipo) {
+                super(id);        // chiama il costruttore della classe astratta
+                this.tipo = tipo;  // assegna il tipo desiderato
+            }
+
+            @Override
+            public TipoVasca getTipo() {
+                return tipo;
+            }
+        }
+        Vasca vascaDonne = new VascaTest("V01", Vasca.TipoVasca.DONNE);
+
+        DescrizioneCorso descr = new DescrizioneCorso("Nuoto Base", Vasca.TipoVasca.DONNE, 4, 10, 2);
         gestore.aggiungiCorso("C1", descr);
         Corso corso = gestore.cercaCorso("C1");
 
@@ -242,6 +259,8 @@ public class GestoreCorsiTest {
         Lezione lezione = corso.cercaLezione("L1");
 
         Corsia corsia = new Corsia("CR1");
+        corsia.setVasca(vascaDonne);  // importante assegnare la vasca
+
         gestore.AggiungiCorsia("C1", "L1", corsia);
 
         assertEquals(lezione, corsia.getElencoLezioni().get("L1"));
@@ -279,7 +298,7 @@ public class GestoreCorsiTest {
     @Test
     void testMostraCorsiPerTipologiaClienti() throws Exception {
         gestore.aggiungiCorso("C1", descr);
-        assertDoesNotThrow(() -> gestore.mostraCorsiPerTipologiaClienti("Donne"));
+        assertDoesNotThrow(() -> gestore.mostraCorsiPerTipologiaClienti(Vasca.TipoVasca.DONNE));
     }
 
 
@@ -299,11 +318,11 @@ public class GestoreCorsiTest {
     @Test
     void testGetCorsiDaEliminare() throws Exception {
         // Corso con pochi occupati → da eliminare
-        DescrizioneCorso descrLow = new DescrizioneCorso("AcquaGym", "Adulti", 10, 5, 2); // 20%
+        DescrizioneCorso descrLow = new DescrizioneCorso("AcquaGym", Vasca.TipoVasca.UOMINI, 10, 5, 2); // 20%
         gestore.aggiungiCorso("C1", descrLow);
 
         // Corso normale → non da eliminare
-        DescrizioneCorso descrNorm = new DescrizioneCorso("Yoga", "Donne", 10, 5, 5); // 50%
+        DescrizioneCorso descrNorm = new DescrizioneCorso("Yoga", Vasca.TipoVasca.DONNE, 10, 5, 5); // 50%
         gestore.aggiungiCorso("C2", descrNorm);
 
         List<Corso> daEliminare = gestore.getCorsiDaEliminare();
@@ -314,11 +333,11 @@ public class GestoreCorsiTest {
     @Test
     void testGetCorsiDaAmpliare() throws Exception {
         // Corso quasi pieno → da ampliare
-        DescrizioneCorso descrHigh = new DescrizioneCorso("Pilates", "Adulti", 10, 5, 9); // 90%
+        DescrizioneCorso descrHigh = new DescrizioneCorso("Pilates", Vasca.TipoVasca.UOMINI, 10, 5, 9); // 90%
         gestore.aggiungiCorso("C3", descrHigh);
 
         // Corso normale → non da ampliare
-        DescrizioneCorso descrNorm = new DescrizioneCorso("Nuoto", "Donne", 10, 5, 5); // 50%
+        DescrizioneCorso descrNorm = new DescrizioneCorso("Nuoto", Vasca.TipoVasca.DONNE, 10, 5, 5); // 50%
         gestore.aggiungiCorso("C4", descrNorm);
 
         List<Corso> daAmpliare = gestore.getCorsiDaAmpliare();

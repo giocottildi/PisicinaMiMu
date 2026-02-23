@@ -28,11 +28,23 @@ public abstract class Vasca {
         BAMBINI,
         MISTA,
         RIABILITAZIONE;
+        
+    public static TipoVasca fromMenuChoice(int scelta) {
+        switch (scelta) {
+            case 1: return DONNE;
+            case 2: return UOMINI;
+            case 3: return BAMBINI;
+            case 4: return MISTA;
+            case 5: return RIABILITAZIONE;
+            default:
+                throw new IllegalArgumentException("Scelta non valida: " + scelta);
+        }
+    }
 
         public static TipoVasca fromString(String tipo)
                 throws TipologiaVascaNonEsistenteException {
             try {
-                return TipoVasca.valueOf(tipo.toUpperCase());
+                return TipoVasca.valueOf(tipo.trim().toUpperCase());
             } catch (IllegalArgumentException e) {
                 throw new TipologiaVascaNonEsistenteException(tipo);
             }

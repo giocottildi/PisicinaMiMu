@@ -12,11 +12,20 @@ import java.util.*;
 public class Cliente {
     
     public enum TipologiaCliente {
-    Donne,
-    Uomini,
-    Bambini,
-    Riabilitazione
+    DONNE,
+    UOMINI,
+    BAMBINI,
+    RIABILITAZIONE;
+    
+    public static TipologiaCliente fromString(String str) throws TipologiaClienteNonEsistenteException {
+        try {
+            return TipologiaCliente.valueOf(str.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new TipologiaClienteNonEsistenteException(str);
+        }
+    }
 }
+    
     
     private String nome, cognome, idCliente;
     private Map<String, Corso> corsiIscritti;

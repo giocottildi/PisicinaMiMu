@@ -20,7 +20,7 @@ public class IstruttoreTest {
     void setUp(){
     
         is = new Istruttore("Franco", "Colapinto", "IS1");
-        cd = new DescrizioneCorso("NuotoSincronizzato", "Donne", 10, 5, 0);
+        cd = new DescrizioneCorso("NuotoSincronizzato", Vasca.TipoVasca.DONNE, 10, 5, 0);
     
     }
     

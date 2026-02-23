@@ -41,8 +41,7 @@ public class GestoreCorsi {
 
     }
 
-    
-    
+   
     
     public void aggiungiCorso(String idCorso, DescrizioneCorso descrizione) throws CorsoGiaPresenteException {
         Corso corso;
@@ -61,18 +60,20 @@ public class GestoreCorsi {
         try{
             
             BufferedReader bf = new BufferedReader(new FileReader(nomeFile));
-            String idCorso, nomeF, nome, tipologiaClienti;
+            String idCorso, nomeF, nome, tipoLetto;
             int numPosti, durata, numPostiOccupati;
 
             DescrizioneCorso descrizione;
             Corso corso;
+            Vasca.TipoVasca tipologiaClienti;
             
 
             while((idCorso = bf.readLine()) != null){
                 System.out.println("idCorso letto: '" + idCorso + "'");
 
                 nome=bf.readLine();
-                tipologiaClienti=bf.readLine();
+                tipoLetto = bf.readLine();
+                tipologiaClienti = Vasca.TipoVasca.fromString(tipoLetto);
                 numPosti = Integer.parseInt(bf.readLine());
                 durata = Integer.parseInt(bf.readLine());
                 numPostiOccupati = Integer.parseInt(bf.readLine());
@@ -88,6 +89,9 @@ public class GestoreCorsi {
             System.out.println("Numero corsi caricati: " + elencoCorsi.size());
             bf.close();
             
+        }catch(TipologiaVascaNonEsistenteException e){
+            System.out.println("ERRORE IN FASE DI I/O");
+            System.exit(-1);
         }catch(IOException e){
             System.out.println("ERRORE IN FASE DI I/O");
             System.exit(-1);
@@ -182,8 +186,9 @@ public class GestoreCorsi {
     
         public synchronized String aggiungiCorso(){ 
         BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
-        String idCorso, nome, tipologiaClienti;
-        tipologiaClienti = "Mista";
+        String idCorso, nome; 
+        Vasca.TipoVasca tipologiaClienti;
+//        tipologiaClienti = "Mista";
         int numPosti, durata;
         Corso corso;
         DescrizioneCorso descrizione;
@@ -199,26 +204,12 @@ public class GestoreCorsi {
             //info per la descrizione
             System.out.println("Nome corso: ");
             nome = bf.readLine();
-            System.out.println("Scegli tipologia clienti corso\n1)Donne\n2)Uomini\n3)Bambini\n4)Mista\n5)Riabilitazione");
-            String scelta = bf.readLine();
-            switch(Integer.parseInt(scelta)){
-                case 1: 
-                        tipologiaClienti = "Donne";
-                        break;
-                case 2: 
-                        tipologiaClienti = "Uomini";
-                        break;
-                case 3: 
-                        tipologiaClienti = "Bambini";
-                        break;
-                case 4: 
-                        tipologiaClienti = "Mista";
-                        break;
-                case 5: 
-                        tipologiaClienti = "Riabilitazione";
-                        break;
-                        
-            }
+            System.out.println("Scegli tipologia clienti corso");
+            System.out.println("1)Donne\n2)Uomini\n3)Bambini\n4)Mista\n5)Riabilitazione");
+
+            int sceltaInt = Integer.parseInt(bf.readLine());
+
+            tipologiaClienti = Vasca.TipoVasca.fromMenuChoice(sceltaInt);
             System.out.println("Numero posti: ");
             numPosti = Integer.parseInt(bf.readLine());
             if (numPosti <= 0) {
@@ -300,20 +291,30 @@ public class GestoreCorsi {
             cd.setNome(bf.readLine());
     }
     
-    public synchronized void ModificaTipologiaClienti(String id_corso) throws CorsoNonPresenteException, IOException {
+    public synchronized void ModificaTipologiaClienti(String id_corso) 
+            throws CorsoNonPresenteException, IOException {
 
         BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
 
-        Corso corso;
-        DescrizioneCorso cd;
-        corso = cercaCorso(id_corso);
+        Corso corso = cercaCorso(id_corso);
+        DescrizioneCorso cd = corso.getDescrizione();
+        Vasca.TipoVasca nuovoTipo;
+        int scelta;
+        System.out.println("Scegli la nuova tipologia clienti:");
+        System.out.println("1) Donne\n2) Uomini\n3) Bambini\n4) Mista\n5) Riabilitazione");
 
-        System.out.println("Inserisci la nuova tipologia clienti --->");
+        try {
+            scelta = Integer.parseInt(bf.readLine());
+            nuovoTipo = Vasca.TipoVasca.fromMenuChoice(scelta);
+            cd.setTipologiaClienti(nuovoTipo);
+            System.out.println("Tipologia clienti aggiornata a: " + nuovoTipo);
 
-        cd = corso.getDescrizione();
-        cd.setTipologiaClienti(bf.readLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Errore: inserisci un numero valido!");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Errore: tipologia non valida!");
+        }
     }
-
     
     public synchronized void ModificaDurata(String id_corso) 
             throws CorsoNonPresenteException, IOException {
@@ -414,14 +415,22 @@ public class GestoreCorsi {
     
     }
     
-    public synchronized void AggiungiCorsia(String id_corso, String id_lezione, Corsia cr) throws CorsoNonPresenteException, LezioneNonPresenteException,
-            CorsiaGiaPresenteException{
-        Corso c = this.cercaCorso(id_corso);
-        Lezione l = c.cercaLezione(id_lezione);
-        cr.addLezione(l);
-        l.addCorsia(cr);
-        
-    }
+    public synchronized void AggiungiCorsia(String id_corso, String id_lezione, Corsia cr) throws CorsoNonPresenteException,
+                  LezioneNonPresenteException, CorsiaGiaPresenteException, TipologiaNonCompatibileException {
+
+       Corso c = this.cercaCorso(id_corso);
+       Lezione l = c.cercaLezione(id_lezione);
+
+       Vasca.TipoVasca tipoCorso = c.getTipoCorso();
+       Vasca.TipoVasca tipoVasca = cr.getVasca().getTipo();
+
+        if (tipoCorso != tipoVasca) {
+            throw new TipologiaNonCompatibileException(tipoCorso, tipoVasca);
+        }
+
+       cr.addLezione(l);
+       l.addCorsia(cr);
+   }
     
     public List<Corso> getCorsiDaEliminare() {
         List<Corso> lista = new ArrayList<>();
@@ -465,16 +474,21 @@ public class GestoreCorsi {
         }
     }
     
-    public void mostraCorsiPerTipologiaClienti(String tipologiaClienti) {
+    public void mostraCorsiPerTipologiaClienti(Vasca.TipoVasca tipologiaClienti) {
+
         boolean trovato = false;
+
         for (Corso c : elencoCorsi.values()) {
-            if (c.getDescrizione().getTipologia_clienti().equalsIgnoreCase(tipologiaClienti)) {
+
+            if (c.getDescrizione().getTipologiaClienti() == tipologiaClienti) {
                 c.stampaDettagli();
                 trovato = true;
             }
         }
+
         if (!trovato) {
-            System.out.println("Nessun corso trovato per la tipologia clienti: " + tipologiaClienti);
+            System.out.println("Nessun corso trovato per la tipologia clienti: "
+                               + tipologiaClienti);
         }
     }
     public void mostraCorsiPerPercentualePienezza() {

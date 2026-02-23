@@ -177,11 +177,16 @@ public class InterazioneUtente{
                 String idCorso = bf.readLine();
                 gc.mostraCorso(idCorso);
                 break;
-            case 3:
-                System.out.print("Inserisci tipologiaClienti: ");
-                String tipoClienti = bf.readLine();
-                gc.mostraCorsiPerTipologiaClienti(tipoClienti);
-                break;
+        case 3:
+            System.out.print("Inserisci tipologiaClienti: ");
+            String tipoClientiStr = bf.readLine();
+            try {
+                Vasca.TipoVasca tipoClientiEnum = Vasca.TipoVasca.fromString(tipoClientiStr);
+                gc.mostraCorsiPerTipologiaClienti(tipoClientiEnum);
+            } catch (TipologiaVascaNonEsistenteException e) {
+                System.out.println(e.getMessage());
+            }
+            break;
             case 4: gc.mostraCorsiPerPercentualePienezza(); break;
             default: System.out.println("Scelta non valida");
         }
@@ -510,6 +515,8 @@ public class InterazioneUtente{
             gc.AggiungiCorsia(id_corso, id_lezione, cr);
 
         }catch(CorsoNonPresenteException e){
+            System.out.println(e);
+        }catch(TipologiaNonCompatibileException e){
             System.out.println(e);
         }catch(LezioneNonPresenteException e){
             System.out.println(e);

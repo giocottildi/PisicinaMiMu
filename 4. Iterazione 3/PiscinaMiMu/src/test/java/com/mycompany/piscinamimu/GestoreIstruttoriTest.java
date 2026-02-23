@@ -71,7 +71,7 @@ public class GestoreIstruttoriTest {
         Istruttore i2 = g.getIstruttore("IS2");
 
         // Rendi i2 non disponibile
-        DescrizioneCorso cd = new DescrizioneCorso("Nuoto", "Adulti", 10, 5, 0);
+        DescrizioneCorso cd = new DescrizioneCorso("Nuoto", Vasca.TipoVasca.DONNE, 10, 5, 0);
         i2.AssegnaCorso(new Corso("C1", cd));
         i2.AssegnaCorso(new Corso("C2", cd));
         i2.AssegnaCorso(new Corso("C3", cd));
@@ -91,7 +91,7 @@ public class GestoreIstruttoriTest {
 
         // i1 disponibile, i2 reso non disponibile
         Istruttore i2 = g.getIstruttore("IS2");
-        DescrizioneCorso cd = new DescrizioneCorso("Nuoto", "Adulti", 10, 5, 0);
+        DescrizioneCorso cd = new DescrizioneCorso("Nuoto", Vasca.TipoVasca.DONNE, 10, 5, 0);
         i2.AssegnaCorso(new Corso("C1", cd));
         i2.AssegnaCorso(new Corso("C2", cd));
         i2.AssegnaCorso(new Corso("C3", cd));
@@ -104,7 +104,7 @@ public class GestoreIstruttoriTest {
         g.AssumiIstruttore("Piero", "Angela", "IS1");
 
         Istruttore i1 = g.getIstruttore("IS1");
-        DescrizioneCorso cd = new DescrizioneCorso("Nuoto", "Adulti", 10, 5, 0);
+        DescrizioneCorso cd = new DescrizioneCorso("Nuoto", Vasca.TipoVasca.DONNE, 10, 5, 0);
         i1.AssegnaCorso(new Corso("C1", cd));
         i1.AssegnaCorso(new Corso("C2", cd));
         i1.AssegnaCorso(new Corso("C3", cd));

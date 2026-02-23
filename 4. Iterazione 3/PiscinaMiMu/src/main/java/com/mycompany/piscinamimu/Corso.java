@@ -96,7 +96,9 @@ public class Corso {
         return String.format("%.2f", calcolaPercentualePienezza());
     }
     
-    
+    public Vasca.TipoVasca getTipoCorso() {
+        return this.descrizione.getTipologiaClienti();
+    }
     
     
     public void stampaDettagli() {

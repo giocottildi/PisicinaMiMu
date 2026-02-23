@@ -18,8 +18,12 @@ public class GestoreClienti {
     }
     
     
-    public Cliente getCliente(String idCliente) {
-        return elencoClienti.get(idCliente);
+    public Cliente getCliente(String id_cliente) throws ClienteNonPresenteException {
+        Cliente cl = elencoClienti.get(id_cliente);
+        if (cl == null) {
+            throw new ClienteNonPresenteException(id_cliente);
+        }
+        return cl;
     }
 
     public Collection<Cliente> getElencoClienti() {
@@ -33,6 +37,8 @@ public class GestoreClienti {
         }
         elencoClienti.put(cliente.getIdCliente(), cliente);
     }
+    
+    
 
     // Caricamento clienti da file
     public synchronized void caricaClienti(String nomeFile) {
@@ -44,16 +50,13 @@ public class GestoreClienti {
             while ((idCliente = bf.readLine()) != null) {
                 nome = bf.readLine();
                 cognome = bf.readLine();
-                
                 tipologia = bf.readLine();
-                tipo = Cliente.TipologiaCliente.valueOf(tipologia);
-                
-                Cliente cliente = new Cliente(nome, cognome, idCliente, tipo);
-
                 try {
+                    tipo = Cliente.TipologiaCliente.fromString(tipologia);
+                    Cliente cliente = new Cliente(nome, cognome, idCliente, tipo);
                     aggiungiCliente(cliente);
                     System.out.println("Cliente caricato: " + cliente);
-                } catch (ClienteGiaPresenteException e) {
+                } catch (ClienteGiaPresenteException | TipologiaClienteNonEsistenteException e) {
                     System.out.println(e.getMessage());
                 }
             }
@@ -92,29 +95,31 @@ public class GestoreClienti {
         }
     }
     
-   public void IscrizioneClienteCorso(String id_cliente, Corso c) throws PostiPieniException, ClienteNonPresenteException,
-            TipologiaNonCorrispondente, ClienteGiaIscrittoException{
-        Cliente cl = this.getCliente(id_cliente);
-        Map<String, Corso> corsi_iscritti = cl.getCorsiIscritti();
-        if(corsi_iscritti.get(c.getIdCorso()) != null) throw new ClienteGiaIscrittoException(id_cliente, c.getIdCorso());
-        DescrizioneCorso cd = c.getDescrizione();
-        String tipo_corso_string = cd.getTipologia_clienti();
-        
-        if (tipo_corso_string.equalsIgnoreCase("Mista")) {
-            cd.aumentaPostiOccupati();
-            System.out.println("Cliente: "+id_cliente+" aggiunto correttamente al Corso: "+c.getIdCorso()+" con tipo: "+tipo_corso_string);
-            cl.AggiungiCorso(c);
-            return;
-        }
-        
-        Cliente.TipologiaCliente tipo_corso = Cliente.TipologiaCliente.valueOf(cd.getTipologia_clienti());
-        
-        if(cl.getTipologia() == tipo_corso){
-            cd.aumentaPostiOccupati();
-            cl.AggiungiCorso(c);
-            System.out.println("Cliente: "+id_cliente+" aggiunto correttamente al Corso: "+c.getIdCorso()+" con tipo: "+tipo_corso_string);
-        }else throw new TipologiaNonCorrispondente(id_cliente, c);
-        
-        
-    } 
+    public void IscrizioneClienteCorso(String id_cliente, Corso c) 
+            throws PostiPieniException, ClienteNonPresenteException,
+                   TipologiaNonCorrispondente, ClienteGiaIscrittoException {
+
+        try {
+            Cliente cl = this.getCliente(id_cliente);
+            Map<String, Corso> corsi_iscritti = cl.getCorsiIscritti();
+            if (corsi_iscritti.get(c.getIdCorso()) != null) {
+                throw new ClienteGiaIscrittoException(id_cliente, c.getIdCorso());
+            }
+
+
+            DescrizioneCorso cd = c.getDescrizione();
+
+            if (cd.isCompatibileCon(cl.getTipologia())) {
+                cd.aumentaPostiOccupati();
+                cl.AggiungiCorso(c);
+                System.out.println("Cliente: " + id_cliente +
+                                   " aggiunto correttamente al Corso: " + c.getIdCorso() +
+                                   " con tipo: " + cd.getTipologiaClienti());
+            } else {
+                throw new TipologiaNonCorrispondente(id_cliente, c);
+            }
+        } catch (ClienteNonPresenteException e) {
+            System.out.println(e.getMessage());
+        }        
+    }
 }
